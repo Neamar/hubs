@@ -22,7 +22,7 @@ export class Manager {
       view: document.getElementById('pixi-canvas') as HTMLCanvasElement,
       resolution: window.devicePixelRatio || 1,
       autoDensity: true,
-      backgroundColor: background,
+      backgroundColor: 0xaa00aa,
       width: width,
       height: height,
     });
@@ -75,5 +75,4 @@ export class Manager {
 // Also, this could be in its own file...
 export interface IScene extends DisplayObject {
   application: Application;
-  update(framesPassed: number): void;
 }

@@ -21,20 +21,19 @@ export class SelectionArrow extends Container {
     this.sprite = Sprite.from('arrow.svg');
     this.sprite.anchor.set(0, 0.5);
     this.addChild(this.sprite);
-    this.onDraw();
-    this.rotation = road.angleFrom(from);
+    const angle = road.angleFrom(from);
+    this.x = City.RADIUS * Math.cos(angle);
+    this.y = City.RADIUS * Math.sin(angle);
+    this.rotation = angle;
     this.interactive = true;
 
-    const targetScale = road.length / this.width / 4;
-    console.log(road.length, targetScale);
+    const targetScale = 0.25; //road.length / this.width / 4;
     this.scale.x = 0;
     this.scale.y = 0;
 
-    new Tween(this.scale, this.group).to({ x: targetScale, y: 1 }, 500).start();
+    new Tween(this.scale, this.group).to({ x: targetScale, y: targetScale }, 500).start();
     Ticker.shared.add(this.update, this);
   }
-
-  private onDraw() { }
 
   public override destroy(options?: IDestroyOptions | boolean) {
     Ticker.shared.remove(this.update, this);

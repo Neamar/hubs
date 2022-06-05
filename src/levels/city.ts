@@ -8,15 +8,17 @@ BitmapFont.from('arial', {
   fontSize: 15,
 });
 
-const IDLE = 0xffffff;
+const DEFAULT = 0xffffff;
 const HOVERED = 0xaa0000;
-const CLICKED = 0x00aa00;
+const SELECTED = 0x00aa00;
+const POTENTIAL_TARGET = 0x0000aa;
 
 export class City extends Container {
+  public static RADIUS = 25;
   private graphics: Graphics;
   private text: BitmapText;
   private units = 50;
-  private state: number = IDLE;
+  private state: number = DEFAULT;
   private roads: Road[] = [];
   private arrows: SelectionArrow[] = [];
 
@@ -35,8 +37,6 @@ export class City extends Container {
     this.addChild(this.text);
 
     this.onDraw();
-    // events that begin with "pointer" are touch + mouse
-    this.on('pointertap', this.onPointerTap, this);
     this.on('mouseover', this.onMouseOver, this);
     this.on('mouseout', this.onMouseOut, this);
     this.interactive = true;
@@ -46,35 +46,53 @@ export class City extends Container {
     this.graphics.clear();
     this.graphics.beginFill(this.state);
     this.graphics.lineStyle(1, 0x000000);
-    this.graphics.drawCircle(0, 0, 25);
+    this.graphics.drawCircle(0, 0, City.RADIUS);
     this.graphics.endFill();
 
     this.text.text = this.units.toString();
   }
-  private update(deltaTime: number): void { }
 
-  private onPointerTap() {
-    if (this.state === CLICKED) {
+  public stateSelected() {
+    if (this.state === SELECTED) {
       return;
     }
 
-    this.state = CLICKED;
+    this.state = SELECTED;
     this.arrows = this.roads.map((road) => {
       const arrow = new SelectionArrow(this, road);
       this.addChildAt(arrow, 0);
       return arrow;
     });
     this.onDraw();
+    this.roads.forEach((r) => r.leadsTo(this).statePotentialTarget());
   }
-  private onMouseOver() {
-    this.state = HOVERED;
+
+  public stateDefault() {
+    if (this.arrows.length) {
+      this.arrows.forEach((a) => a.destroy());
+      this.roads.forEach((r) => r.leadsTo(this).stateDefault());
+      this.arrows = [];
+    }
+
+    this.state = DEFAULT;
     this.onDraw();
+  }
+
+  public statePotentialTarget() {
+    this.state = POTENTIAL_TARGET;
+    this.onDraw();
+  }
+
+  private onMouseOver() {
+    if (this.state === DEFAULT) {
+      this.state = HOVERED;
+      this.onDraw();
+    }
   }
   private onMouseOut() {
-    this.arrows.forEach((a) => a.destroy());
-    this.arrows = [];
-    this.state = IDLE;
-    this.onDraw();
+    if (this.state === HOVERED) {
+      this.stateDefault();
+    }
   }
 
   public addRoad(road: Road) {
