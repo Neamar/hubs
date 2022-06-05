@@ -1,40 +1,39 @@
-import { BitmapFont, BitmapText, Container, Graphics, InteractionEvent, Sprite, Ticker } from 'pixi.js';
+import { BitmapFont, BitmapText, Container, Graphics, InteractionEvent } from 'pixi.js';
 
-// If you need to know, this is the expensive part. This creates the font atlas
-const bitmapFont = BitmapFont.from("arial", {
-  fill: "#ffffff", // White, will be colored later
-  fontFamily: "Arial",
-  fontSize: 15
+BitmapFont.from('arial', {
+  fill: '#ffffff', // White, will be colored later
+  fontFamily: 'Arial',
+  fontSize: 15,
 });
 
-const IDLE = 0xFFFFFF;
-const HOVERED = 0xAA0000;
-const CLICKED = 0x00AA00;
+const IDLE = 0xffffff;
+const HOVERED = 0xaa0000;
+const CLICKED = 0x00aa00;
 
 export class City extends Container {
   private graphics: Graphics;
   private text: BitmapText;
-  private units: number = 0;
-  private state: number = IDLE
+  private units = 0;
+  private state: number = IDLE;
   constructor() {
     super();
 
     this.graphics = new Graphics();
     this.addChild(this.graphics);
 
-    this.text = new BitmapText("0", {
-      fontName: "arial",
+    this.text = new BitmapText('0', {
+      fontName: 'arial',
       fontSize: 15,
-      tint: 0xFF0000 // Here we make it red.
+      tint: 0xff0000, // Here we make it red.
     });
-    this.text.anchor.set(0.5)
+    this.text.anchor.set(0.5);
     this.addChild(this.text);
 
     this.onDraw();
     // events that begin with "pointer" are touch + mouse
-    this.on("pointertap", this.onPointerTap, this);
-    this.on("mouseover", this.onMouseOver, this);
-    this.on("mouseout", this.onMouseOut, this);
+    this.on('pointertap', this.onPointerTap, this);
+    this.on('mouseover', this.onMouseOver, this);
+    this.on('mouseout', this.onMouseOut, this);
     this.interactive = true;
   }
 
@@ -47,9 +46,7 @@ export class City extends Container {
 
     this.text.text = this.units.toString();
   }
-  private update(deltaTime: number): void {
-
-  }
+  private update(deltaTime: number): void { }
 
   private onPointerTap(e: InteractionEvent) {
     this.state = CLICKED;

@@ -1,11 +1,9 @@
-
 export interface ILevelCityData {
-  x: number,
-  y: number,
-  edges?: number[]
+  x: number;
+  y: number;
+  edges?: number[];
 }
 
-
 export interface ILevelData {
-  cities: ILevelCityData[],
+  cities: ILevelCityData[];
 }

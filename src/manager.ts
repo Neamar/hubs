@@ -1,14 +1,11 @@
 import { Application, DisplayObject } from 'pixi.js';
 
 export class Manager {
-  private constructor() { }
-
   static app: Application;
   private static currentScene: IScene;
 
   private static _width: number;
   private static _height: number;
-
 
   public static get width(): number {
     return Manager._width;
@@ -17,25 +14,23 @@ export class Manager {
     return Manager._height;
   }
 
-
   public static initialize(width: number, height: number, background: number): void {
-
     Manager._width = width;
     Manager._height = height;
 
     Manager.app = new Application({
-      view: document.getElementById("pixi-canvas") as HTMLCanvasElement,
+      view: document.getElementById('pixi-canvas') as HTMLCanvasElement,
       resolution: window.devicePixelRatio || 1,
       autoDensity: true,
       backgroundColor: background,
       width: width,
-      height: height
+      height: height,
     });
 
-    Manager.app.ticker.add(Manager.update)
+    Manager.app.ticker.add(Manager.update);
 
     // listen for the browser telling us that the screen size changed
-    window.addEventListener("resize", Manager.resize);
+    window.addEventListener('resize', Manager.resize);
 
     // call it manually once so we are sure we are the correct size after starting
     Manager.resize();
