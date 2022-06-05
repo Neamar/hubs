@@ -27,8 +27,6 @@ export class Manager {
       height: height,
     });
 
-    Manager.app.ticker.add(Manager.update);
-
     // listen for the browser telling us that the screen size changed
     window.addEventListener('resize', Manager.resize);
 
@@ -70,17 +68,6 @@ export class Manager {
     // Add the new one
     Manager.currentScene = newScene;
     Manager.app.stage.addChild(Manager.currentScene);
-  }
-
-  // This update will be called by a pixi ticker and tell the scene that a tick happened
-  private static update(framesPassed: number): void {
-    // Let the current scene know that we updated it...
-    // Just for funzies, sanity check that it exists first.
-    if (Manager.currentScene) {
-      Manager.currentScene.update(framesPassed);
-    }
-
-    // as I said before, I HATE the "frame passed" approach. I would rather use `Manager.app.ticker.deltaMS`
   }
 }
 

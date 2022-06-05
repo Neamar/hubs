@@ -1,7 +1,7 @@
 export interface ILevelCityData {
   x: number;
   y: number;
-  edges?: number[];
+  roads?: number[];
 }
 
 export interface ILevelData {

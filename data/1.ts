@@ -9,7 +9,7 @@ const data: ILevelData = {
     {
       x: 600,
       y: 100,
-      edges: [0],
+      roads: [0],
     },
     {
       x: 600,
@@ -18,11 +18,12 @@ const data: ILevelData = {
     {
       x: 100,
       y: 400,
-      edges: [2],
+      roads: [2],
     },
     {
       x: 300,
       y: 200,
+      roads: [0],
     },
   ],
 };

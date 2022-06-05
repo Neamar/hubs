@@ -1,4 +1,6 @@
 import { BitmapFont, BitmapText, Container, Graphics, InteractionEvent } from 'pixi.js';
+import { Road } from './road';
+import { SelectionArrow } from './selectionArrow';
 
 BitmapFont.from('arial', {
   fill: '#ffffff', // White, will be colored later
@@ -13,8 +15,11 @@ const CLICKED = 0x00aa00;
 export class City extends Container {
   private graphics: Graphics;
   private text: BitmapText;
-  private units = 0;
+  private units = 50;
   private state: number = IDLE;
+  private roads: Road[] = [];
+  private arrows: SelectionArrow[] = [];
+
   constructor() {
     super();
 
@@ -48,19 +53,31 @@ export class City extends Container {
   }
   private update(deltaTime: number): void { }
 
-  private onPointerTap(e: InteractionEvent) {
+  private onPointerTap() {
+    if (this.state === CLICKED) {
+      return;
+    }
+
     this.state = CLICKED;
-    this.units = 50;
+    this.arrows = this.roads.map((road) => {
+      const arrow = new SelectionArrow(this, road);
+      this.addChildAt(arrow, 0);
+      return arrow;
+    });
     this.onDraw();
   }
-  private onMouseOver(e: InteractionEvent) {
+  private onMouseOver() {
     this.state = HOVERED;
-    this.units = 75;
     this.onDraw();
   }
-  private onMouseOut(e: InteractionEvent) {
+  private onMouseOut() {
+    this.arrows.forEach((a) => a.destroy());
+    this.arrows = [];
     this.state = IDLE;
-    this.units = 0;
     this.onDraw();
+  }
+
+  public addRoad(road: Road) {
+    this.roads.push(road);
   }
 }

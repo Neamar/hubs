@@ -8,7 +8,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "pixi.js": "^6.3.0"
+    "pixi.js": "^6.3.0",
+    "tweedle.js": "^2.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.27.0",
