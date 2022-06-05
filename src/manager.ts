@@ -14,7 +14,7 @@ export class Manager {
     return Manager._height;
   }
 
-  public static initialize(width: number, height: number, background: number): void {
+  public static initialize(width: number, height: number): void {
     Manager._width = width;
     Manager._height = height;
 

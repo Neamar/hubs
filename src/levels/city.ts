@@ -1,6 +1,8 @@
-import { BitmapFont, BitmapText, Container, Graphics, InteractionEvent } from 'pixi.js';
+import { BitmapFont, BitmapText, Container, Graphics, Ticker } from 'pixi.js';
+import { Level } from './level';
 import { Road } from './road';
 import { SelectionArrow } from './selectionArrow';
+import { Unit } from './unit';
 
 BitmapFont.from('arial', {
   fill: '#ffffff', // White, will be colored later
@@ -8,19 +10,19 @@ BitmapFont.from('arial', {
   fontSize: 15,
 });
 
-const DEFAULT = 0xffffff;
-const HOVERED = 0xaa0000;
-const SELECTED = 0x00aa00;
-const POTENTIAL_TARGET = 0x0000aa;
-
 export class City extends Container {
+  public static DEFAULT = 0xffffff;
+  public static HOVERED = 0xaa0000;
+  public static SELECTED = 0x00aa00;
+  public static POTENTIAL_TARGET = 0x0000aa;
   public static RADIUS = 25;
   private graphics: Graphics;
   private text: BitmapText;
-  private units = 50;
-  private state: number = DEFAULT;
+  public units = 50;
   private roads: Road[] = [];
   private arrows: SelectionArrow[] = [];
+  private connexions: Road[] = [];
+  public state: number = City.DEFAULT;
 
   constructor() {
     super();
@@ -42,6 +44,17 @@ export class City extends Container {
     this.interactive = true;
   }
 
+  public update(level: Level) {
+    if (!this.connexions.length || this.connexions.length > this.units) {
+      return;
+    }
+    this.connexions.forEach((road) => {
+      level.addUnit(this, road);
+    });
+    this.units -= this.connexions.length;
+    this.drawUnitCount();
+  }
+
   private onDraw() {
     this.graphics.clear();
     this.graphics.beginFill(this.state);
@@ -49,15 +62,18 @@ export class City extends Container {
     this.graphics.drawCircle(0, 0, City.RADIUS);
     this.graphics.endFill();
 
+    this.drawUnitCount();
+  }
+  public drawUnitCount() {
     this.text.text = this.units.toString();
   }
 
   public stateSelected() {
-    if (this.state === SELECTED) {
+    if (this.state === City.SELECTED) {
       return;
     }
 
-    this.state = SELECTED;
+    this.state = City.SELECTED;
     this.arrows = this.roads.map((road) => {
       const arrow = new SelectionArrow(this, road);
       this.addChildAt(arrow, 0);
@@ -74,28 +90,39 @@ export class City extends Container {
       this.arrows = [];
     }
 
-    this.state = DEFAULT;
+    this.state = City.DEFAULT;
     this.onDraw();
   }
 
   public statePotentialTarget() {
-    this.state = POTENTIAL_TARGET;
+    this.state = City.POTENTIAL_TARGET;
     this.onDraw();
   }
 
   private onMouseOver() {
-    if (this.state === DEFAULT) {
-      this.state = HOVERED;
+    if (this.state === City.DEFAULT) {
+      this.state = City.HOVERED;
       this.onDraw();
     }
   }
   private onMouseOut() {
-    if (this.state === HOVERED) {
+    if (this.state === City.HOVERED) {
       this.stateDefault();
     }
   }
 
   public addRoad(road: Road) {
     this.roads.push(road);
+  }
+
+  public addConnexion(city: City) {
+    const road = this.roads.find((r) => r.leadsTo(this) === city);
+    if (road) {
+      if (this.connexions.includes(road)) {
+        this.connexions.splice(this.connexions.indexOf(road), 1);
+      } else {
+        this.connexions.push(road);
+      }
+    }
   }
 }

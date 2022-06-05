@@ -3,10 +3,6 @@ import { Group, Tween } from 'tweedle.js';
 import { City } from './city';
 import { Road } from './road';
 
-const IDLE = 0;
-const HOVERED = 1;
-const CLICKED = 2;
-
 Sprite.from('arrow.svg');
 export class SelectionArrow extends Container {
   private sprite: Sprite;
@@ -27,9 +23,9 @@ export class SelectionArrow extends Container {
     this.rotation = angle;
     this.interactive = true;
 
-    const targetScale = 0.25; //road.length / this.width / 4;
-    this.scale.x = 0;
-    this.scale.y = 0;
+    const targetScale = 0.25;
+    this.scale.x = 0.1;
+    this.scale.y = 0.1;
 
     new Tween(this.scale, this.group).to({ x: targetScale, y: targetScale }, 500).start();
     Ticker.shared.add(this.update, this);

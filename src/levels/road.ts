@@ -41,7 +41,7 @@ export class Road extends Graphics {
     }
   }
 
-  public get length() {
+  public get distance() {
     return Math.sqrt(Math.pow(this.from.x - this.to.x, 2) + Math.pow(this.from.y - this.to.y, 2));
   }
 }
