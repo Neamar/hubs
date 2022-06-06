@@ -1,8 +1,7 @@
-import { BitmapFont, BitmapText, Container, Graphics, Ticker } from 'pixi.js';
+import { BitmapFont, BitmapText, Container, Graphics } from 'pixi.js';
 import { Level } from './level';
 import { Road } from './road';
 import { SelectionArrow } from './selectionArrow';
-import { Unit } from './unit';
 
 BitmapFont.from('arial', {
   fill: '#ffffff', // White, will be colored later
