@@ -1,4 +1,10 @@
-import { Application, DisplayObject } from 'pixi.js';
+import { Application, BitmapFont, BitmapText, DisplayObject, Ticker } from 'pixi.js';
+
+BitmapFont.from('arial', {
+  fill: '#ffffff',
+  fontFamily: 'Arial',
+  fontSize: 10,
+});
 
 export class Manager {
   static app: Application;
@@ -14,6 +20,8 @@ export class Manager {
     return Manager._height;
   }
 
+  private static fpsCounter: BitmapText;
+
   public static initialize(width: number, height: number): void {
     Manager._width = width;
     Manager._height = height;
@@ -25,6 +33,18 @@ export class Manager {
       backgroundColor: 0xaa00aa,
       width: width,
       height: height,
+    });
+
+    Manager.fpsCounter = new BitmapText('0', {
+      fontName: 'arial',
+      fontSize: 15,
+      tint: 0x000000,
+    });
+
+    Manager.app.stage.addChild(Manager.fpsCounter);
+
+    Ticker.shared.add(() => {
+      Manager.fpsCounter.text = `${Math.round(Ticker.shared.FPS)} FPS`;
     });
   }
 
@@ -38,7 +58,7 @@ export class Manager {
 
     // Add the new one
     Manager.currentScene = newScene;
-    Manager.app.stage.addChild(Manager.currentScene);
+    Manager.app.stage.addChildAt(Manager.currentScene, 0);
   }
 }
 

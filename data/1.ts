@@ -1,3 +1,4 @@
+import { CityType } from '../src/levels/city';
 import { ILevelData } from './data';
 
 const data: ILevelData = {
@@ -7,6 +8,7 @@ const data: ILevelData = {
       x: 100,
       y: 100,
       owner: 0,
+      type: CityType.CAPITAL,
     },
     {
       x: 600,

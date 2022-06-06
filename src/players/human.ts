@@ -1,6 +1,6 @@
 import { InteractionEvent } from 'pixi.js';
-import { City } from '../levels/city';
-import { Level } from '../levels/level';
+import { City, CityState } from '../levels/city';
+import { Level, LevelEvent } from '../levels/level';
 import { Player } from './player';
 
 export class HumanPlayer extends Player {
@@ -9,7 +9,7 @@ export class HumanPlayer extends Player {
   constructor(index: number, level: Level) {
     super(index, level);
 
-    level.once(Level.BOOTSTRAPPED, () => {
+    level.once(LevelEvent.BOOTSTRAPPED, () => {
       level.cities.forEach((city) => {
         city.on('pointertap', this.onCitySelect, this);
       });
@@ -20,7 +20,7 @@ export class HumanPlayer extends Player {
 
   onCitySelect(e: InteractionEvent) {
     if (e.target instanceof City) {
-      if (e.target.state === City.POTENTIAL_TARGET && this.selectedCity) {
+      if (e.target.state === CityState.POTENTIAL_TARGET && this.selectedCity) {
         this.selectedCity.addConnexion(e.target);
         this.selectedCity.stateDefault();
       } else {

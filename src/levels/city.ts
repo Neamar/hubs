@@ -1,5 +1,6 @@
 import { BitmapFont, BitmapText, Container, Graphics } from 'pixi.js';
 import { Player } from '../players/player';
+import { assertExists } from '../utils/assert';
 import { Level } from './level';
 import { Road } from './road';
 import { SelectionArrow } from './selectionArrow';
@@ -10,19 +11,26 @@ BitmapFont.from('arial', {
   fontSize: 15,
 });
 
+export enum CityState {
+  DEFAULT = 0xffffff,
+  HOVERED = 0xe3756d,
+  SELECTED = 0x00aa00,
+  POTENTIAL_TARGET = 0x03fcdf,
+}
+
+export enum CityEvent {
+  OWNER_CHANGED = 'owner_changed',
+}
+
+export enum CityType {
+  PLAIN = Number.POSITIVE_INFINITY,
+  VILLAGE = 1000,
+  CITY = 500,
+  CAPITAL = 200,
+}
+
 export class City extends Container {
-  public static DEFAULT = 0xffffff;
-  public static HOVERED = 0xe3756d;
-  public static SELECTED = 0x00aa00;
-  public static POTENTIAL_TARGET = 0x03fcdf;
   public static RADIUS = 25;
-
-  public static PLAIN = 0;
-  public static VILLAGE = 1;
-  public static CITY = 1;
-  public static CAPITAL = 5;
-
-  public static OWNER_CHANGED = 'owner_changed';
 
   private graphics: Graphics;
   private text: BitmapText;
@@ -31,8 +39,9 @@ export class City extends Container {
   private roads: Road[] = [];
   private arrows: SelectionArrow[] = [];
   private connexions: Road[] = [];
-  public state: number = City.DEFAULT;
-  public type = City.PLAIN;
+  public state: number = CityState.DEFAULT;
+  public type = CityType.VILLAGE;
+  private timeTillLastSpawnedUnit = 0;
 
   constructor() {
     super();
@@ -55,10 +64,22 @@ export class City extends Container {
     this.interactive = true;
   }
 
-  public update(level: Level) {
-    if (!this.connexions.length || this.connexions.length > this.units) {
+  public update(level: Level, deltaMS: number) {
+    this.timeTillLastSpawnedUnit += deltaMS;
+    if (this.timeTillLastSpawnedUnit >= this.type) {
+      this.units++;
+      this.timeTillLastSpawnedUnit -= this.type;
+    }
+
+    if (!this.connexions.length) {
       return;
     }
+    // Sever existing connexions when empty
+    if (this.connexions.length > this.units) {
+      this.connexions = [];
+      return;
+    }
+
     this.connexions.forEach((road) => {
       level.addMovingUnit(this, road);
     });
@@ -67,7 +88,7 @@ export class City extends Container {
 
   private onDraw() {
     this.graphics.clear();
-    this.graphics.beginFill(this.state === City.DEFAULT && this._player ? this._player.color : this.state);
+    this.graphics.beginFill(this.state === CityState.DEFAULT && this._player ? this._player.color : this.state);
     this.graphics.lineStyle(1, 0x000000);
     this.graphics.drawCircle(0, 0, City.RADIUS);
     this.graphics.endFill();
@@ -102,15 +123,15 @@ export class City extends Container {
     this._player = player;
     this.connexions = [];
     this.onDraw();
-    this.emit(City.OWNER_CHANGED);
+    this.emit(CityEvent.OWNER_CHANGED);
   }
 
   public stateSelected() {
-    if (this.state === City.SELECTED) {
+    if (this.state === CityState.SELECTED) {
       return;
     }
 
-    this.state = City.SELECTED;
+    this.state = CityState.SELECTED;
     this.arrows = this.roads.map((road) => {
       const arrow = new SelectionArrow(this, road);
       this.addChildAt(arrow, 0);
@@ -127,23 +148,23 @@ export class City extends Container {
       this.arrows = [];
     }
 
-    this.state = City.DEFAULT;
+    this.state = CityState.DEFAULT;
     this.onDraw();
   }
 
   public statePotentialTarget() {
-    this.state = City.POTENTIAL_TARGET;
+    this.state = CityState.POTENTIAL_TARGET;
     this.onDraw();
   }
 
   private onMouseOver() {
-    if (this.state === City.DEFAULT) {
-      this.state = City.HOVERED;
+    if (this.state === CityState.DEFAULT) {
+      this.state = CityState.HOVERED;
       this.onDraw();
     }
   }
   private onMouseOut() {
-    if (this.state === City.HOVERED) {
+    if (this.state === CityState.HOVERED) {
       this.stateDefault();
     }
   }
@@ -154,12 +175,16 @@ export class City extends Container {
 
   public addConnexion(city: City) {
     const road = this.roads.find((r) => r.leadsTo(this) === city);
-    if (road) {
-      if (this.connexions.includes(road)) {
-        this.connexions.splice(this.connexions.indexOf(road), 1);
-      } else {
-        this.connexions.push(road);
-      }
+    assertExists(road);
+
+    if (road.leadsTo(this).connexions.includes(road)) {
+      return;
+    }
+
+    if (this.connexions.includes(road)) {
+      this.connexions.splice(this.connexions.indexOf(road), 1);
+    } else {
+      this.connexions.push(road);
     }
   }
 }

@@ -15,7 +15,6 @@ module.exports = {
     'prefer-template': 'error',
     'no-constant-condition': 0,
     camelcase: 0,
-    'no-unused-vars': ['warn', { varsIgnorePattern: 'Type.*' }],
     'jest/no-deprecated-functions': 0,
   },
 };

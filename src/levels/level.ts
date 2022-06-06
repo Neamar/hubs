@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, InteractionEvent, ParticleContainer, Ticker } from 'pixi.js';
+import { Application, Container, Graphics, ParticleContainer, Ticker } from 'pixi.js';
 import { ILevelData } from '../../data/data';
 import { IScene } from '../manager';
 import { HumanPlayer } from '../players/human';
@@ -9,10 +9,12 @@ import { City } from './city';
 import { Road } from './road';
 import { Unit } from './unit';
 
-export class Level extends Container implements IScene {
-  public static BOOTSTRAPPED = 'bootstrapped';
+export enum LevelEvent {
+  BOOTSTRAPPED = 'bootstrapped',
+}
 
-  application: Application;
+export class Level extends Container implements IScene {
+  public application: Application;
   public cities: City[] = [];
   private unitContainer: ParticleContainer = new ParticleContainer();
   private units: Unit[] = [];
@@ -36,6 +38,9 @@ export class Level extends Container implements IScene {
       const city = new City();
       city.x = cityData.x;
       city.y = cityData.y;
+      if (cityData.type) {
+        city.type = cityData.type;
+      }
       if (cityData.owner !== undefined) {
         city.setPlayer(this.players[cityData.owner]);
       }
@@ -57,15 +62,15 @@ export class Level extends Container implements IScene {
 
     this.interactive = true;
 
-    setInterval(this.updateCities.bind(this), 1000);
+    Ticker.shared.add(this.updateCities, this);
 
     Ticker.shared.add(this.updateMovingUnits, this);
 
-    this.emit(Level.BOOTSTRAPPED);
+    this.emit(LevelEvent.BOOTSTRAPPED);
   }
 
   updateCities() {
-    this.cities.forEach((c) => c.update(this));
+    this.cities.forEach((c) => c.update(this, Ticker.shared.deltaMS));
   }
 
   updateMovingUnits() {
