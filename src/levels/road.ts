@@ -4,6 +4,8 @@ import { City } from './city';
 export class Road extends Graphics {
   private from: City;
   private to: City;
+  public capacity = 1;
+
   constructor(fromCity: City, toCity: City) {
     super();
 

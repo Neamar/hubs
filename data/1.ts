@@ -1,15 +1,18 @@
 import { ILevelData } from './data';
 
 const data: ILevelData = {
+  players: 2,
   cities: [
     {
       x: 100,
       y: 100,
+      owner: 0,
     },
     {
       x: 600,
       y: 100,
       roads: [0],
+      owner: 1,
     },
     {
       x: 600,
@@ -24,6 +27,7 @@ const data: ILevelData = {
       x: 300,
       y: 200,
       roads: [0],
+      owner: 0,
     },
   ],
 };

@@ -1,4 +1,5 @@
 import { BitmapFont, BitmapText, Container, Graphics } from 'pixi.js';
+import { Player } from '../players/player';
 import { Level } from './level';
 import { Road } from './road';
 import { SelectionArrow } from './selectionArrow';
@@ -11,17 +12,27 @@ BitmapFont.from('arial', {
 
 export class City extends Container {
   public static DEFAULT = 0xffffff;
-  public static HOVERED = 0xaa0000;
+  public static HOVERED = 0xe3756d;
   public static SELECTED = 0x00aa00;
-  public static POTENTIAL_TARGET = 0x0000aa;
+  public static POTENTIAL_TARGET = 0x03fcdf;
   public static RADIUS = 25;
+
+  public static PLAIN = 0;
+  public static VILLAGE = 1;
+  public static CITY = 1;
+  public static CAPITAL = 5;
+
+  public static OWNER_CHANGED = 'owner_changed';
+
   private graphics: Graphics;
   private text: BitmapText;
-  public units = 50;
+  private _units = 5;
+  private _player?: Player;
   private roads: Road[] = [];
   private arrows: SelectionArrow[] = [];
   private connexions: Road[] = [];
   public state: number = City.DEFAULT;
+  public type = City.PLAIN;
 
   constructor() {
     super();
@@ -32,10 +43,11 @@ export class City extends Container {
     this.text = new BitmapText('0', {
       fontName: 'arial',
       fontSize: 15,
-      tint: 0xff0000, // Here we make it red.
+      tint: 0x000000,
     });
     this.text.anchor.set(0.5);
     this.addChild(this.text);
+    this.units = 5;
 
     this.onDraw();
     this.on('mouseover', this.onMouseOver, this);
@@ -48,23 +60,49 @@ export class City extends Container {
       return;
     }
     this.connexions.forEach((road) => {
-      level.addUnit(this, road);
+      level.addMovingUnit(this, road);
     });
     this.units -= this.connexions.length;
-    this.drawUnitCount();
   }
 
   private onDraw() {
     this.graphics.clear();
-    this.graphics.beginFill(this.state);
+    this.graphics.beginFill(this.state === City.DEFAULT && this._player ? this._player.color : this.state);
     this.graphics.lineStyle(1, 0x000000);
     this.graphics.drawCircle(0, 0, City.RADIUS);
     this.graphics.endFill();
-
-    this.drawUnitCount();
   }
-  public drawUnitCount() {
+
+  public get units() {
+    return this._units;
+  }
+
+  public set units(units) {
+    this._units = units;
     this.text.text = this.units.toString();
+  }
+
+  public addUnits(units: number, player: Player) {
+    if (player === this.player) {
+      this.units += units;
+    } else {
+      this.units -= units;
+      if (this.units < 0) {
+        this.units = -this.units;
+        this.setPlayer(player);
+      }
+    }
+  }
+
+  public get player() {
+    return this._player;
+  }
+
+  public setPlayer(player: Player) {
+    this._player = player;
+    this.connexions = [];
+    this.onDraw();
+    this.emit(City.OWNER_CHANGED);
   }
 
   public stateSelected() {
